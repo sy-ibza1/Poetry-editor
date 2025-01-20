@@ -6,6 +6,7 @@ body {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   padding: 10px;
   background-color: #f4f4f4;
@@ -15,19 +16,22 @@ body {
 textarea {
   flex: 1;
   margin-right: 10px;
+  min-width: 200px;
 }
 
 #canvasContainer {
   position: relative;
   width: 100%;
-  height: 80vh;
+  height: calc(100vh - 70px); /* Adjust height dynamically */
   background-color: #fff;
   border: 1px solid #ccc;
+  overflow: hidden; /* Prevent scrolling issues on mobile */
 }
 
 #canvas {
   width: 100%;
   height: 100%;
+  touch-action: none; /* Prevent default touch gestures */
 }
 
 .grid {
