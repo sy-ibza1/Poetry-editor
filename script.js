@@ -35,35 +35,56 @@ function addVectorizedText() {
   textElement.setAttribute('fill', 'black');
   textElement.setAttribute('draggable', 'true');
 
-  // Drag functionality
-  textElement.addEventListener('mousedown', (event) => {
-    const offsetX = event.offsetX - parseFloat(textElement.getAttribute('x'));
-    const offsetY = event.offsetY - parseFloat(textElement.getAttribute('y'));
-
-    function onMouseMove(e) {
-      const x = e.offsetX - offsetX;
-      const y = e.offsetY - offsetY;
-
-      // Snap to grid
-      if (gridToggle.checked) {
-        textElement.setAttribute('x', Math.round(x / 20) * 20);
-        textElement.setAttribute('y', Math.round(y / 20) * 20);
-      } else {
-        textElement.setAttribute('x', x);
-        textElement.setAttribute('y', y);
-      }
-    }
-
-    function onMouseUp() {
-      canvas.removeEventListener('mousemove', onMouseMove);
-      canvas.removeEventListener('mouseup', onMouseUp);
-    }
-
-    canvas.addEventListener('mousemove', onMouseMove);
-    canvas.addEventListener('mouseup', onMouseUp);
-  });
-
+  addDragAndDrop(textElement);
   canvas.appendChild(textElement);
+}
+
+// Function to add drag-and-drop functionality (Mouse and Touch)
+function addDragAndDrop(element) {
+  let offsetX, offsetY;
+
+  // Drag Start
+  function dragStart(event) {
+    event.preventDefault();
+    const isTouch = event.type === 'touchstart';
+    const point = isTouch ? event.touches[0] : event;
+
+    offsetX = point.clientX - element.getBoundingClientRect().x;
+    offsetY = point.clientY - element.getBoundingClientRect().y;
+
+    document.addEventListener(isTouch ? 'touchmove' : 'mousemove', dragMove);
+    document.addEventListener(isTouch ? 'touchend' : 'mouseup', dragEnd);
+  }
+
+  // Drag Move
+  function dragMove(event) {
+    event.preventDefault();
+    const isTouch = event.type === 'touchmove';
+    const point = isTouch ? event.touches[0] : event;
+
+    let x = point.clientX - canvas.getBoundingClientRect().x - offsetX;
+    let y = point.clientY - canvas.getBoundingClientRect().y - offsetY;
+
+    // Snap to grid if enabled
+    if (gridToggle.checked) {
+      x = Math.round(x / 20) * 20;
+      y = Math.round(y / 20) * 20;
+    }
+
+    element.setAttribute('x', x);
+    element.setAttribute('y', y);
+  }
+
+  // Drag End
+  function dragEnd(event) {
+    event.preventDefault();
+    document.removeEventListener(event.type === 'touchend' ? 'touchmove' : 'mousemove', dragMove);
+    document.removeEventListener(event.type === 'touchend' ? 'touchend' : 'mouseup', dragEnd);
+  }
+
+  // Add event listeners for both mouse and touch
+  element.addEventListener('mousedown', dragStart);
+  element.addEventListener('touchstart', dragStart, { passive: false });
 }
 
 // Event Listeners
